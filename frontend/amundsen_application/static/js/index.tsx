@@ -30,6 +30,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import SearchPage from './pages/SearchPage';
 import ProfilePage from './pages/ProfilePage';
 import TableDetail from './pages/TableDetailPage';
+import CardView from './pages/CardView';
 
 import Preloader from './components/Preloader';
 import Footer from './features/Footer';
@@ -37,57 +38,58 @@ import NavBar from './features/NavBar';
 
 const sagaMiddleware = createSagaMiddleware();
 const createStoreWithMiddleware = applyMiddleware(
-  ReduxPromise,
-  analyticsMiddleware,
-  sagaMiddleware
+    ReduxPromise,
+    analyticsMiddleware,
+    sagaMiddleware
 )(createStore);
 const store = createStoreWithMiddleware(rootReducer);
 
 sagaMiddleware.run(rootSaga);
 
 const Routes: React.FC = () => {
-  const history = BrowserHistory;
+    const history = BrowserHistory;
 
-  function trackPageView() {
-    store.dispatch(pageViewed(window.location.pathname));
-  }
+    function trackPageView() {
+        store.dispatch(pageViewed(window.location.pathname));
+    }
 
-  React.useEffect(() => {
-    trackPageView(); // To track the first pageview upon load
-    history.listen(trackPageView); // To track the subsequent pageviews
-  }, [history]);
+    React.useEffect(() => {
+        trackPageView(); // To track the first pageview upon load
+        history.listen(trackPageView); // To track the subsequent pageviews
+    }, [history]);
 
-  return (
-    <>
-      <Route component={NavBar} />
-      <Switch>
-        <Route path="/announcements" component={AnnouncementPage} />
-        <Route path="/browse" component={BrowsePage} />
-        <Route path="/dashboard/:uri" component={DashboardPage} />
-        <Route path="/search" component={SearchPage} />
-        <Route
-          path="/table_detail/:cluster/:database/:schema/:table"
-          component={TableDetail}
-        />
-        <Route path="/user/:userId" component={ProfilePage} />
-        <Route path="/404" component={NotFoundPage} />
-        <Route path="/" component={HomePage} />
-      </Switch>
-    </>
-  );
+    return (
+        <>
+            <Route component={NavBar} />
+            <Switch>
+                <Route path="/announcements" component={AnnouncementPage} />
+                <Route path="/browse" component={BrowsePage} />
+                <Route path="/dashboard/:uri" component={DashboardPage} />
+                <Route path="/cardview" component={CardView} />
+                <Route path="/search" component={SearchPage} />
+                <Route
+                    path="/table_detail/:cluster/:database/:schema/:table"
+                    component={TableDetail}
+                />
+                <Route path="/user/:userId" component={ProfilePage} />
+                <Route path="/404" component={NotFoundPage} />
+                <Route path="/" component={HomePage} />
+            </Switch>
+        </>
+    );
 };
 
 ReactDOM.render(
-  <DocumentTitle title={getDocumentTitle()}>
-    <Provider store={store}>
-      <Router history={BrowserHistory}>
-        <div id="main">
-          <Preloader />
-          <Routes />
-          <Footer />
-        </div>
-      </Router>
-    </Provider>
-  </DocumentTitle>,
-  document.getElementById('content') || document.createElement('div')
+    <DocumentTitle title={getDocumentTitle()}>
+        <Provider store={store}>
+            <Router history={BrowserHistory}>
+                <div id="main">
+                    <Preloader />
+                    <Routes />
+                    <Footer />
+                </div>
+            </Router>
+        </Provider>
+    </DocumentTitle>,
+    document.getElementById('content') || document.createElement('div')
 );
