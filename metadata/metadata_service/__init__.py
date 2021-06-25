@@ -41,6 +41,9 @@ from metadata_service.api.user import (UserDetailAPI, UserFollowAPI,
                                        UserFollowsAPI, UserOwnAPI, UserOwnsAPI,
                                        UserReadsAPI)
 
+from metadata_service.api.all_tables import AllTablesAPI        #import new all_table api
+
+
 # For customized flask use below arguments to override.
 FLASK_APP_MODULE_NAME = os.getenv('FLASK_APP_MODULE_NAME')
 FLASK_APP_CLASS_NAME = os.getenv('FLASK_APP_CLASS_NAME')
@@ -105,7 +108,9 @@ def create_app(*, config_module_class: str) -> Flask:
     api_bp.add_url_rule('/healthcheck', 'healthcheck', healthcheck)
 
     api = Api(api_bp)
-
+    
+    api.add_resource(AllTablesAPI, '/all_tables/')  #add the new api
+  
     api.add_resource(PopularTablesAPI,
                      '/popular_tables/',
                      '/popular_tables/<path:user_id>')
