@@ -139,7 +139,7 @@ class Neo4jProxy(BaseProxy):
         :return: A list of all the Tables
         """
 
-        keys = []       #create an empty array that will hold the keys ass strings
+        keys = []       #create an empty array that will hold the keys as strings
         keys_query = textwrap.dedent("""\
         MATCH (n:Table) return n.key
         """)            #cypher query to get the keys
@@ -148,8 +148,12 @@ class Neo4jProxy(BaseProxy):
             keys.append(entry['n.key'])                                     #add each string key to the keys array
         #now we will build the array of tables from the keys
         tables = []                                                         # table array to hold the different tables
-        for uri in keys[:-1]:                                               #TODO fix this bug where the last key passed to get_table is invalid
-            tables.append(self.get_table(table_uri=uri))                    #call the get table function and pass the key
+        for uri in keys:                                                    #for each unique table key
+            try:                                                            #wrap get_table call in try catch to deal with invalid table keys
+                tables.append(self.get_table(table_uri=uri))                    #call the get table function and pass the key
+            except Exception as e:                                          #handle invalid table uris        
+                message = 'Encountered exception in all_tables proxy: ' + str(e)
+                logging.exception(message)
         LOGGER.debug('Successfully executed get_all_tables function in neo4j_proxy')
         return tables
     """
