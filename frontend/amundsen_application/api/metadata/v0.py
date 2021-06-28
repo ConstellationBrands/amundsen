@@ -106,7 +106,7 @@ def all_tables() -> Response:
         if status_code == HTTPStatus.OK:                    #if request is successful
             message = 'Success - All tables have been fetched'  #set message
             response_list = response.json().get('all_tables')   #store the the table data from the response as JSON in a list
-            all_tables = [marshall_table_full(result) for result in response_list]   #call marshall fxn from metadata_utils.py to sanitize each table from the response list (ensure consistency)
+            all_tables = [marshall_table_partial(result) for result in response_list]   #call marshall fxn from metadata_utils.py to sanitize each table from the response list (ensure consistency)
         else:
             message = 'Encountered error: Request to metadata service to fetch all_tables failed with status code ' + str(status_code)
             logging.error(message)
