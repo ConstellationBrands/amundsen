@@ -31,7 +31,7 @@ POPULAR_TABLES_ENDPOINT = '/popular_tables'
 TAGS_ENDPOINT = '/tags/'
 USER_ENDPOINT = '/user'
 DASHBOARD_ENDPOINT = '/dashboard'
-
+ALL_TABLES_ENDPOINT = '/all_tables'
 
 def _get_table_endpoint() -> str:
     table_endpoint = app.config['METADATASERVICE_BASE'] + TABLE_ENDPOINT
@@ -85,6 +85,45 @@ def popular_tables() -> Response:
         logging.exception(message)
         payload = jsonify({'results': [{}], 'msg': message})
         return make_response(payload, HTTPStatus.INTERNAL_SERVER_ERROR)
+"""
+Hudson
+"""
+@metadata_blueprint.route('/all_tables', methods=['GET'])
+def all_tables() -> Response:
+    """
+    New route to fetch all the tables from Neo4j for Briana's frontend card view
+    call the metadata service endpoint to get all the tables
+    :return: a json output containing an array of all table metadata as 'popular_tables'
+    """
+    try:
+        service_base = app.config['METADATASERVICE_BASE']   #builds the base of the url to be consistent with the popular_tables route
+        url = f'{service_base}{ALL_TABLES_ENDPOINT}'        #builds the route for all-tables
+
+        response = request_metadata(url=url)                #calls request_metadata from request_util.py (helper function for making requests to metadata service)
+        status_code = response.status_code                  #store status code returned in the response
+
+        #check status and act accordingly
+        if status_code == HTTPStatus.OK:                    #if request is successful
+            message = 'Success - All tables have been fetched'  #set message
+            response_list = response.json().get('all_tables')   #store the the table data from the response as JSON in a list
+            all_tables = [marshall_table_partial(result) for result in response_list]   #call marshall fxn from metadata_utils.py to sanitize each table from the response list (ensure consistency)
+        else:
+            message = 'Encountered error: Request to metadata service to fetch all_tables failed with status code ' + str(status_code)
+            logging.error(message)
+            all_tables = [{}]
+    
+        payload = jsonify({'results': all_tables, 'msg': message})  #prepare response
+        return make_response(payload, status_code)                  #make response and return
+    except Exception as e:
+        message = 'Encountered exception in all_tables function: ' + str(e)
+        logging.exception(message)
+        payload = jsonify({'results': [{}], 'msg': message})
+        return make_response(payload, HTTPStatus.INTERNAL_SERVER_ERROR)
+
+"""
+END all_tables function
+Hudson
+"""
 
 
 @metadata_blueprint.route('/table', methods=['GET'])

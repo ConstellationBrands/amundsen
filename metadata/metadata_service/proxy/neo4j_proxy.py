@@ -7,7 +7,7 @@ import time
 from random import randint
 from typing import (Any, Dict, Iterable, List, Optional, Tuple,  # noqa: F401
                     Union, no_type_check)
-
+import json
 import neo4j
 from amundsen_common.models.dashboard import DashboardSummary
 from amundsen_common.models.feature import Feature
@@ -128,7 +128,38 @@ class Neo4jProxy(BaseProxy):
                       )
 
         return table
+    """
+    Hudson 
+    Start new proxy to get all keys from neo4j and then call the above function(get_table) to build a list of tables
+    """
+    #@timer_with_counter
+    def get_all_tables(self) -> List[Table]:
+        """
+        :param
+        :return: A list of all the Tables
+        """
 
+        keys = []       #create an empty array that will hold the keys as strings
+        keys_query = textwrap.dedent("""\
+        MATCH (n:Table) return n.key
+        """)            #cypher query to get the keys
+        keys_data = self._execute_cypher_query(statement=keys_query, param_dict={})        #execute the query and store results in keys_data
+        for entry in keys_data:                                             #for every key entry in the list
+            keys.append(entry['n.key'])                                     #add each string key to the keys array
+        #now we will build the array of tables from the keys
+        tables = []                                                         # table array to hold the different tables
+        for uri in keys:                                                    #for each unique table key
+            try:                                                            #wrap get_table call in try catch to deal with invalid table keys
+                tables.append(self.get_table(table_uri=uri))                    #call the get table function and pass the key
+            except Exception as e:                                          #handle invalid table uris        
+                message = 'Encountered exception in all_tables proxy: ' + str(e)
+                logging.exception(message)
+        LOGGER.debug('Successfully executed get_all_tables function in neo4j_proxy')
+        return tables
+    """
+    Hudson
+    End fxn
+    """
     @timer_with_counter
     def _exec_col_query(self, table_uri: str) -> Tuple:
         # Return Value: (Columns, Last Processed Record)
