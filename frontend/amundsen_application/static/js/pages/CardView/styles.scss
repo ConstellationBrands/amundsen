@@ -3,6 +3,34 @@
 
 @import 'variables';
 
-.cardview {
-  margin: auto;
+
+
+@media (max-width: 600px) {
+    .cardview-container {
+        margin: 2% 5% auto;
+    }
+}
+
+@media (min-width: 900px) {
+    .cardview-container {
+        margin: 2% 10% auto;
+    }
+}
+  
+@media (min-width: 1200px) {
+    .cardview-container {
+        margin: 2% 10% auto;
+    }
+}
+  
+@media (min-width: 1500px) {
+    .cardview-container {
+        margin: 2% 10% auto;
+    }
+}
+
+@media (min-width: 1800px) {
+    .cardview-container {
+        margin: 2% 20% auto;
+    }
 }

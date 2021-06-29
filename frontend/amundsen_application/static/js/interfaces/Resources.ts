@@ -2,72 +2,82 @@ import { PeopleUser } from './User';
 import { Badge } from './Badges';
 
 export enum ResourceType {
-  table = 'table',
-  user = 'user',
-  dashboard = 'dashboard',
-  query = 'query',
+    table = 'table',
+    user = 'user',
+    dashboard = 'dashboard',
+    query = 'query',
+    grid = 'grid',
 }
 
 export const DEFAULT_RESOURCE_TYPE = ResourceType.table;
 
 export interface Resource {
-  type: ResourceType;
+    type: ResourceType;
 }
 
 export interface DashboardResource extends Resource {
-  type: ResourceType.dashboard;
-  cluster: string;
-  description: string;
-  group_name: string;
-  group_url: string;
-  last_successful_run_timestamp: number;
-  name: string;
-  product: string;
-  uri: string;
-  url: string;
-  // Bookmark logic is cleaner if all resources can settle on either "key" or "uri"
-  key?: string;
-  badges?: Badge[];
+    type: ResourceType.dashboard;
+    cluster: string;
+    description: string;
+    group_name: string;
+    group_url: string;
+    last_successful_run_timestamp: number;
+    name: string;
+    product: string;
+    uri: string;
+    url: string;
+    // Bookmark logic is cleaner if all resources can settle on either "key" or "uri"
+    key?: string;
+    badges?: Badge[];
 }
 
 export interface TableResource extends Resource {
-  type: ResourceType.table;
-  cluster: string;
-  database: string;
-  description: string;
-  key: string;
-  // 'popular_tables' currently does not support 'last_updated_timestamp'
-  last_updated_timestamp?: number;
-  name: string;
-  schema: string;
-  schema_description?: string;
-  badges?: Badge[];
+    type: ResourceType.table;
+    cluster: string;
+    database: string;
+    description: string;
+    key: string;
+    // 'popular_tables' currently does not support 'last_updated_timestamp'
+    last_updated_timestamp?: number;
+    name: string;
+    schema: string;
+    schema_description?: string;
+    badges?: Badge[];
+}
+
+export interface GridResource extends Resource {
+    type: ResourceType.grid;
+    title: string;
+    author: string;
+    subtitle: string;
+    photo?: string;
+    href: string;
 }
 
 export enum SortDirection {
-  ascending = 'asc',
-  descending = 'desc',
+    ascending = 'asc',
+    descending = 'desc',
 }
 export interface SortCriteria {
-  name: string;
-  key: string;
-  direction: SortDirection;
+    name: string;
+    key: string;
+    direction: SortDirection;
 }
 
 export interface UserResource extends Resource, PeopleUser {
-  type: ResourceType.user;
+    type: ResourceType.user;
 }
 
 export interface QueryResource extends Resource {
-  type: ResourceType.query;
-  name: string;
-  query_text: string;
-  url: string;
+    type: ResourceType.query;
+    name: string;
+    query_text: string;
+    url: string;
 }
 
 export interface ResourceDict<T> {
-  [ResourceType.table]: T;
-  [ResourceType.dashboard]?: T;
+    [ResourceType.table]: T;
+    [ResourceType.dashboard]?: T;
 }
 
 // TODO - Consider just using the 'Resource' type instead
