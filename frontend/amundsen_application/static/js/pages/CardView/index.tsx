@@ -11,6 +11,7 @@ import { UpdateSearchStateReset } from 'ducks/search/types';
 
 import { ResourceType } from 'interfaces';
 import GridResourceList from 'components/ResourceList/GridResourceList/'
+import LoadingSpinner from 'components/LoadingSpinner/index'
 
 import './styles.scss';
 
@@ -23,12 +24,6 @@ export interface CardViewState {
     cards,
     cardCount
 }
-
-/*
-export const getLink = (table, logging) =>
-  `/table_detail/${table.cluster}/${table.database}/${table.schema}/${table.name}` +
-  `?index=${logging.index}&source=${logging.source}`;
-*/
 
 export class CardView extends React.Component<CardViewProps, CardViewState> {
 
@@ -43,35 +38,29 @@ export class CardView extends React.Component<CardViewProps, CardViewState> {
     }
 
     GetSources() {
-        const count = 12;
-        this.setState({ cardCount: count })
-        // for (let i = 0; i < count; i++) {
-
-        //     fetch(`http://asdfast.beobit.net/api/?type=word&length=15`)
-        //         .then(response => response.json())
-        //         .then(data => {
-        //             this.setState(({ cards }) => ({
-        //                 cards: [
-        //                     ...cards.slice(0, i),
-        //                     {
-        //                         type: ResourceType.grid,
-        //                         title: `Lorem Ipsum`,
-        //                         author: `Quam Nemo`,
-        //                         subtitle: data.text,
-        //                         href: `/home`,
-        //                         photo: `https://source.unsplash.com/random?sig=${Math.floor(Math.random() * 10000)}`,
-        //                     },
-        //                     ...cards.slice(i + 1)
-        //                 ]
-        //             }))
-        //         })
-        //         .catch(e => console.error(e))
-        // }
+        fetch(`${window.location.origin}/api/metadata/v0/all_tables`)
+            .then(response => response.json())
+            .then(data => {
+                this.setState({ cardCount: data.results.length });
+                const newCards = this.state.cards.slice();
+                data.results.forEach(table => {
+                    newCards.push({
+                        type: ResourceType.grid,
+                        title: table.name,
+                        author: table.database,
+                        subtitle: table.description,
+                        href: `/table_detail/${table.cluster}/${table.database}/${table.schema}/${table.name}`,
+                    })
+                });
+                this.setState({ cards: newCards })
+            })
+            .catch(e => console.log(e));
     }
 
     render() {
         let { cards, cardCount } = this.state;
-
+        /*
+        // uncomment to view sample data 
         cards = [
             {
                 type: ResourceType.grid,
@@ -167,10 +156,14 @@ export class CardView extends React.Component<CardViewProps, CardViewState> {
                 photo: `https://images.unsplash.com/photo-1436076863939-06870fe779c2?ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8YmVlcnxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&w=1000&q=80`,
             },
         ]
-
+        */
+        console.log(cards);
         return (
             <main className="cardview-container">
-                <GridResourceList totalItemsCount={cardCount} slicedItems={cards} />
+                {cardCount === 0 ?
+                    <LoadingSpinner /> :
+                    <GridResourceList totalItemsCount={cardCount} slicedItems={cards} />
+                }
             </main>
         );
     }
